@@ -7,6 +7,10 @@ import math
 from sklearn.preprocessing import RobustScaler
 
 
+def load_data(path):
+    return pd.read_csv(path)
+
+
 def plot_distribution_grid(df, columns):
     """Plots a grid of histograms to see data spread."""
     num_cols = len(columns)
