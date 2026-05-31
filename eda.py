@@ -4,7 +4,7 @@ import pandas as pd
 from utils import *
 
 
-
+#teste
 
 customer_info = pd.read_csv('data/customer_info.csv')
 customer_basket = pd.read_csv('data/customer_basket.csv')
