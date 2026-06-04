@@ -50,46 +50,13 @@ plt.rcParams.update({
 })
 
 
-# Lowkey parece inutil
-"""
-def     fig.tight_layout()
-    plt.show()(fig, name: str) -> None:
-    #Show the figure.  Replace with fig.savefig(f'{name}.png') if needed.
-    fig.tight_layout()
-    plt.show()
-    plt.close(fig)
-"""
-
-def print_overview(df_info: pd.DataFrame, df_basket: pd.DataFrame):
-    """
-    Print basic info about the datasets, customer counts, and total spend stats
-    """
-    print("=" * 60)
-    print("DATASET OVERVIEW")
-    print("=" * 60)
-    print(f"\ncustomer_info  : {df_info.shape[0]:,} rows  x  {df_info.shape[1]} columns")
-    print(f"customer_basket: {df_basket.shape[0]:,} rows  x  {df_basket.shape[1]} columns")
-
-    spend_cols = [c for c in df_info.columns if c.startswith("lifetime_spend")]
-    df_info_copy = df_info.copy()
-    df_info_copy["total_spend"] = df_info_copy[spend_cols].fillna(0).sum(axis=1)
-
-    print(f"\nUnique customers in info  : {df_info['customer_id'].nunique():,}")
-    print(f"Unique customers in basket: {df_basket['customer_id'].nunique():,}")
-    print(f"\nTotal spend — mean : €{df_info_copy['total_spend'].mean():,.0f}")
-    print(f"Total spend — median : €{df_info_copy['total_spend'].median():,.0f}")
-    print(f"Total spend — max  : €{df_info_copy['total_spend'].max():,.0f}")
-    print("=" * 60)
-
-
-
 # MISSING VALUES
 
-def plot_missing_values(df_info: pd.DataFrame):
+def plot_missing_values(df):
     """
     Bar chart of missing-value percentages per column
     """
-    miss_pct = (df_info.isnull().mean() * 100).sort_values(ascending=False)
+    miss_pct = (df.isnull().mean() * 100).sort_values(ascending=False)
     miss_pct = miss_pct[miss_pct > 0]
 
     fig, ax = plt.subplots(figsize=(10, 4), facecolor=BG_COLOR)
@@ -108,15 +75,14 @@ def plot_missing_values(df_info: pd.DataFrame):
     plt.show()
 
 
-
 # DEMOGRAPHICS
 
-def plot_demographics(df_info: pd.DataFrame):
+def plot_demographics(df):
     """
     Age distribution, gender split, education level, household size
     """
 
-    df = df_info.copy()
+    df = df.copy()
 
     # Age
     df["customer_birthdate"] = pd.to_datetime(
@@ -198,12 +164,12 @@ def plot_demographics(df_info: pd.DataFrame):
 
 # Customer behavior
 
-def plot_customer_behavior(df_info: pd.DataFrame):
+def plot_customer_behavior(df):
     """
     Tenure, loyalty card, typical shopping hour, complaints, promo %
     """
 
-    df = df_info.copy()
+    df = df.copy()
     df["customer_tenure"] = 2026 - df["year_first_transaction"].clip(upper=2026)
     df["has_loyalty_card"] = df["loyalty_card_number"].notna()
     df["number_complaints"] = df["number_complaints"].fillna(0)
@@ -282,12 +248,12 @@ def plot_customer_behavior(df_info: pd.DataFrame):
 
 # Spending analysis
 
-def plot_spend_analysis(df_info: pd.DataFrame) -> None:
+def plot_spend_analysis(df):
     """
     Total spend distribution + category spend shares
     """
 
-    df = df_info.copy()
+    df = df.copy()
     for col in SPEND_COLS:
         df[col] = df[col].fillna(0)
     df["total_spend"] = df[SPEND_COLS].sum(axis=1)
@@ -366,14 +332,14 @@ def plot_spend_analysis(df_info: pd.DataFrame) -> None:
 
 
 # Geographic distribution
-def plot_geographic_distribution(df_info: pd.DataFrame) -> None:
+def plot_geographic_distribution(df):
     """
     GeoPandas map of customer home locations overlaid on a CartoDB basemap
     (via contextily). Axes show WGS-84 latitude / longitude degrees.
     """
     from pyproj import Transformer
 
-    df = df_info.copy()
+    df = df.copy()
 
     # ── Build GeoDataFrame (WGS-84) then reproject to Web Mercator ──────────
     geometry = [Point(lon, lat)
@@ -459,7 +425,7 @@ def plot_geographic_distribution(df_info: pd.DataFrame) -> None:
 
 # Basket analysis
 
-def plot_basket_analysis(df_basket: pd.DataFrame, top_n: int = 20):
+def plot_basket_analysis(df, top_n: int = 20):
     """
     Top N most frequent products and basket size distribution
     """
@@ -467,7 +433,7 @@ def plot_basket_analysis(df_basket: pd.DataFrame, top_n: int = 20):
     # Parse product lists
     all_products = []
     basket_sizes = []
-    for row in df_basket["list_of_goods"].dropna():
+    for row in df["list_of_goods"].dropna():
         try:
             items = ast.literal_eval(row)
             all_products.extend(items)
@@ -507,8 +473,7 @@ def plot_basket_analysis(df_basket: pd.DataFrame, top_n: int = 20):
 
 
 
-def plot_correlation_heatmap(df_features: pd.DataFrame,
-                             feature_cols: list):
+def plot_correlation_heatmap(df_features, feature_cols):
     """
     Lower-triangle correlation heatmap of the engineered feature set
     """

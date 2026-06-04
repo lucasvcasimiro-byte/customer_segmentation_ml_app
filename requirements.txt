@@ -9,3 +9,9 @@ umap-learn
 jupyter
 notebook
 ipykernel
+plotly
+# geo packages (used in functions/eda.py)
+contextily
+geopandas
+pyproj
+shapely

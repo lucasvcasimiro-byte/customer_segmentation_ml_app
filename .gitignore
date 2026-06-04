@@ -1,3 +1,6 @@
+# Local-only folders
+aulas/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -4,21 +4,17 @@ from sklearn.preprocessing import RobustScaler
 
 from functions.eda import SPEND_COLS
 
-current_year=2026
+current_year = 2026
 
 
-# Columns that will be used as features in the clustering model and profiling
+# Columns used as features in the clustering model and profiling
 FEATURE_COLS = [
-    # Demographics 
+    # Demographics
     'age',
     'is_female',
     'dependants',
-    # Checkem as colunas de educação, acho que devemos retirar, mas deixo aqui para experimentarmos com e sem
-    #'edu_Bsc',
-    #'edu_Msc',
-    #'edu_Phd',
 
-    # Buying behavior
+    # Buying behaviour
     'has_loyalty_card',
     'customer_tenure',
     'distinct_stores_visited',
@@ -27,11 +23,14 @@ FEATURE_COLS = [
     'lifetime_total_distinct_products',
     'number_complaints',
 
-    # Spendings  
+    # Spending
     'total_spend',
-    #'spend_per_distinct_product',
 
-    # Shares    
+    # Location
+    'longitude',
+    'latitude',
+
+    # Spend shares
     'share_groceries',
     'share_electronics',
     'share_vegetables',
@@ -41,179 +40,170 @@ FEATURE_COLS = [
     'share_fish',
     'share_hygiene',
     'share_videogames',
-    'share_petfood']
+    'share_petfood',
+]
 
 
-def check_nulls(df: pd.DataFrame, cols: list):
+# Preprocessing steps
+
+def fill_missing_with_zero(df):
     """
-    Verify if there's nulls in specified columns, to confirm that 
-    preprocessing worked as expected  
+    Fill missing values with 0 for complaints, household counts, and spend categories
     """
-    missing = df[cols].isnull().sum()
-    missing = missing[missing > 0]
-
-    if not missing.empty:
-        raise ValueError(
-            f"There's NaN after preprocessing:\n{missing}")
+    cols_to_zero = ['number_complaints', 'kids_home', 'teens_home'] + SPEND_COLS
+    for col in cols_to_zero:
+        df[col] = df[col].fillna(0)
+    return df
 
 
-### NO FIM APAGAR
+def fill_missing_with_median(df):
+    """
+    Fill missing behavioural columns with their median
+    """
+    for col in ('distinct_stores_visited', 'typical_hour', 'percentage_of_products_bought_promotion'):
+        df[col] = df[col].fillna(df[col].median())
+    return df
 
-def parse_customer_age(birthdate: pd.Series, current_year: int = current_year):
-    """Convert customer_birthdate into age with safe fallbacks for parser issues."""
-    parsed_birthdate = pd.to_datetime(
-        birthdate,
-        format='%m/%d/%Y %I:%M %p',
-        errors='coerce',
-    )
 
-    missing_date = parsed_birthdate.isna()
-    if missing_date.any():
-        fallback_birthdate = pd.to_datetime(
-            birthdate.loc[missing_date],
-            format='mixed',
-            errors='coerce',
-        )
-        parsed_birthdate.loc[missing_date] = fallback_birthdate
+def clean_loyalty_card(df):
+    """
+    loyalty_card_number only ever holds value 1; NaN means no card (0)
+    """
+    df['has_loyalty_card'] = df['loyalty_card_number'].notna().astype(int)
+    return df
 
-    age = current_year - parsed_birthdate.dt.year
 
-    # Last fallback: if pandas cannot parse a value, extract the year from text.
+def add_age(df):
+    """
+    Pass customer_birthdate into age and drop the raw birthdate column.
+    Has integrated safety measures by AI due to problems during development.
+    """
+    birthdate = df['customer_birthdate']
+    bd_datetime = pd.to_datetime(birthdate, format='%m/%d/%Y %I:%M %p', errors='coerce')
+
+    missing = bd_datetime.isna()
+    if missing.any():
+        fallback = pd.to_datetime(birthdate.loc[missing], format='mixed', errors='coerce')
+        bd_datetime.loc[missing] = fallback
+
+    age = current_year - bd_datetime.dt.year
+
+    # Last resort: extract a 4-digit year directly from the raw string
     birth_year = pd.to_numeric(
         birthdate.astype(str).str.extract(r'(\d{4})', expand=False),
         errors='coerce',
     )
     age = age.fillna(current_year - birth_year)
-
-    invalid_age = (age < 0) | (age > 120)
-    age = age.mask(invalid_age)
+    age = age.mask((age < 0) | (age > 120))
 
     median_age = age.median()
     if pd.isna(median_age):
         raise ValueError('Could not derive age from customer_birthdate.')
 
-    return age.fillna(median_age)
-
-
-
-
-def preprocessing(df_raw: pd.DataFrame):
-    """
-    Receives the customer_info.csv dataframe and returns a new preprocessed one 
-    with the new features included (no scaling included)
-    """
-    df = df_raw.copy()
-    
-    # Cleans existing columns
-    
-    #  Assuming NaN means there's no registered complaint
-    df['number_complaints'] = df['number_complaints'].fillna(0)
-
-    #  loyalty_card_number only has value 1, so we assume Nan means no loyalty card (binary column)
-    df['has_loyalty_card'] = df['loyalty_card_number'].notna().astype(int)
-
-    #  2026-2029
-    df['year_first_transaction'] = df['year_first_transaction'].clip(upper=current_year)
-
-    #  Considering NaN as 0 (assumimg there's no kids/teens at home)
-    df['kids_home'] = df['kids_home'].fillna(0)
-    df['teens_home'] = df['teens_home'].fillna(0)
-
-    #  Replacing missing values with median
-    df['distinct_stores_visited'] = df['distinct_stores_visited'].fillna(df['distinct_stores_visited'].median())
-    df['typical_hour'] = df['typical_hour'].fillna(df['typical_hour'].median())
-    df['percentage_of_products_bought_promotion'] = df['percentage_of_products_bought_promotion'].fillna(
-        df['percentage_of_products_bought_promotion'].median())
-
-    # In columns with missing values, we assume that NaN means 0 spend
-    for col in SPEND_COLS:
-        df[col] = df[col].fillna(0)
-
-    # Age from birthdate, assuming invalid/missing dates mean median age.
-    df['age'] = parse_customer_age(df['customer_birthdate'], current_year=current_year)
-
-    # Drop birthdate after extracting age
+    df['age'] = age.fillna(median_age)
     df = df.drop(columns=['customer_birthdate'])
+    return df
 
-    # Gender, 1 = female, 0 = male
+
+def add_gender(df):
+    """
+    Binary gender flag where 1 = female and 0 = male
+    """
     df['is_female'] = (df['customer_gender'] == 'female').astype(int)
+    return df
 
 
-######## Acho q deviamos apagar a parte da educacao, mas deixo assim pa experimentarmos com e sem
-
-    # Academic degree from customer_name
-#    df['education_level'] = (
- #       df['customer_name']
-  #      .str.extract(r'^(Bsc|Msc|Phd)\.', expand=False)
-   #     .fillna('No_Degree')
-    #)
-    
-    #edu_dummies = pd.get_dummies(
-     #   df['education_level'],
-      #  prefix='edu',
-       # drop_first=False,
-        #dtype=int
-    #)
-    #df = pd.concat([df, edu_dummies], axis=1)  
-
-    # Dependant people at home (under age)
+def add_dependants(df):
+    """
+    Total dependants at home (kids + teens)
+    """
     df['dependants'] = df['kids_home'] + df['teens_home']
+    return df
 
-    # Customer tenure (years since first transaction)
+
+def add_tenure(df):
+    """
+    Years since first transaction
+    """
+    df['year_first_transaction'] = df['year_first_transaction'].clip(upper=current_year)
     df['customer_tenure'] = current_year - df['year_first_transaction']
     df['customer_tenure'] = df['customer_tenure'].fillna(df['customer_tenure'].median())
+    return df
 
-    # Total spend across all categories
+
+def add_total_spend(df):
+    """
+    Sum of all lifetime spend categories
+    """
     df['total_spend'] = df[SPEND_COLS].sum(axis=1)
+    return df
 
-    # percentagem de cada categoria no total
-    
+
+def add_spend_shares(df):
+    """
+    Fraction of total spend per category (0 when total_spend is 0)
+    """
     for col in SPEND_COLS:
         share_name = 'share_' + col.replace('lifetime_spend_', '')
         df[share_name] = df[col] / df['total_spend'].replace(0, np.nan)
         df[share_name] = df[share_name].fillna(0)
+    return df
 
 
-    #### Esta parte tambem deviamos tentar com e sem, parece pouco relevante
+# Null checking for after preprocessing
+def check_nulls(df, cols):
+    """
+    Raise if any feature column still contains NaN after preprocessing
+    """
+    missing = df[cols].isnull().sum()
+    missing = missing[missing > 0]
+    if not missing.empty:
+        raise ValueError(f"NaN values remain after preprocessing:\n{missing}")
 
-    # Clientes que gastam muito num número reduzido de produtos são premium
-    #df['spend_per_distinct_product'] = (
-     #   df['total_spend'] / df['lifetime_total_distinct_products'].replace(0, np.nan)
-    #)
-    #df['spend_per_distinct_product'] = df['spend_per_distinct_product'].fillna(
-     #   df['spend_per_distinct_product'].median()
-    #)
 
-    # Confirming preprocessing success
+# Conjunction of all above
+def preprocessing(df_raw):
+    """
+    Full preprocessing pipeline. Applies every step in order and returns
+    a clean dataframe ready for scaling and clustering.
+
+    Steps:
+        1. fill_missing_with_zero     - fill NaN complaints, kids, teens, spend with 0
+        2. fill_missing_with_median   - fill NaN behavioural cols with median
+        3. clean_loyalty_card         - binary has_loyalty_card flag
+        4. add_age                    - derive age, drop raw birthdate
+        5. add_gender                 - binary is_female flag
+        6. add_dependants             - kids_home + teens_home
+        7. add_tenure                 - years since first transaction
+        8. add_total_spend            - sum of all spend categories
+        9. add_spend_shares           - per-category fraction of total spend
+       10. check_nulls                - raise if any feature column has NaN
+    """
+    df = df_raw.copy()
+
+    df = fill_missing_with_zero(df)
+    df = fill_missing_with_median(df)
+    df = clean_loyalty_card(df)
+    df = add_age(df)
+    df = add_gender(df)
+    df = add_dependants(df)
+    df = add_tenure(df)
+    df = add_total_spend(df)
+    df = add_spend_shares(df)
+
     check_nulls(df, FEATURE_COLS)
 
     return df
 
 
+# Scaling
 
-def scale_features(df_features: pd.DataFrame):
+def scale_features(df_features):
     """
-    Scales the features using RobustScaler, returning both the scaled dataframe and the scaler object for
-    flexibility
+    Scale FEATURE_COLS with RobustScaler.
+    Returns (df_scaled, scaler) so the scaler can be reused on new data.
     """
     df_scaled = df_features.copy()
-
     scaler = RobustScaler()
     df_scaled[FEATURE_COLS] = scaler.fit_transform(df_features[FEATURE_COLS])
-
     return df_scaled, scaler
-
-
-
-def _check_nulls(df: pd.DataFrame, cols: list):
-    """
-    Verify if there's nulls in specified columns, to confirm that 
-    preprocessing worked as expected
-    
-    """
-    missing = df[cols].isnull().sum()
-    missing = missing[missing > 0]
-
-    if not missing.empty:
-        raise ValueError(
-            f"There's NaN after preprocessing:\n{missing}")
