@@ -8,11 +8,68 @@ current_year = 2026
 
 
 # Columns used as features in the clustering model and profiling
-FEATURE_COLS = [
+NUMERICAL_COLS = [
     # Demographics
     'age',
     'is_female',
     'dependants',
+    'education_level',
+    'vegetarian',
+    'pescatarian',
+    'carnivore',
+    'omnivore',
+
+    # Buying behaviour
+    'has_loyalty_card',
+    'customer_tenure',
+    'distinct_stores_visited',
+    'typical_hour',
+    'percentage_of_products_bought_promotion',
+    'lifetime_total_distinct_products',
+    'number_complaints',
+
+    # Spending
+    'total_spend',
+    'lifetime_spend_groceries',
+    'lifetime_spend_electronics',
+    'lifetime_spend_vegetables',
+    'lifetime_spend_nonalcohol_drinks',
+    'lifetime_spend_alcohol_drinks',
+    'lifetime_spend_meat',
+    'lifetime_spend_fish',
+    'lifetime_spend_hygiene',
+    'lifetime_spend_videogames',
+    'lifetime_spend_petfood',
+
+    # Spend shares
+    'share_groceries',
+    'share_electronics',
+    'share_vegetables',
+    'share_nonalcohol_drinks',
+    'share_alcohol_drinks',
+    'share_meat',
+    'share_fish',
+    'share_hygiene',
+    'share_videogames',
+    'share_petfood',
+    
+    # Location
+    'latitude',
+    'longitude']
+
+
+
+# Updated after eda
+FEATURE_COLS =[
+        # Demographics
+    'age',
+    'is_female',
+    'dependants',
+    'education_level',
+    'vegetarian',
+    'pescatarian',
+    'carnivore',
+    'omnivore',
 
     # Buying behaviour
     'has_loyalty_card',
@@ -26,10 +83,6 @@ FEATURE_COLS = [
     # Spending
     'total_spend',
 
-    # Location
-    'longitude',
-    'latitude',
-
     # Spend shares
     'share_groceries',
     'share_electronics',
@@ -41,7 +94,11 @@ FEATURE_COLS = [
     'share_hygiene',
     'share_videogames',
     'share_petfood',
-]
+    
+    # Location
+    'latitude',
+    'longitude']
+
 
 
 # Preprocessing steps
@@ -50,7 +107,7 @@ def fill_missing_with_zero(df):
     """
     Fill missing values with 0 for complaints, household counts, and spend categories
     """
-    cols_to_zero = ['number_complaints', 'kids_home', 'teens_home'] + SPEND_COLS
+    cols_to_zero = ['number_complaints', 'kids_home', 'teens_home', 'dependants'] + SPEND_COLS
     for col in cols_to_zero:
         df[col] = df[col].fillna(0)
     return df
@@ -60,7 +117,7 @@ def fill_missing_with_median(df):
     """
     Fill missing behavioural columns with their median
     """
-    for col in ('distinct_stores_visited', 'typical_hour', 'percentage_of_products_bought_promotion'):
+    for col in ('distinct_stores_visited', 'typical_hour', 'percentage_of_products_bought_promotion', 'age'):
         df[col] = df[col].fillna(df[col].median())
     return df
 
@@ -70,38 +127,22 @@ def clean_loyalty_card(df):
     loyalty_card_number only ever holds value 1; NaN means no card (0)
     """
     df['has_loyalty_card'] = df['loyalty_card_number'].notna().astype(int)
+    df = df.drop(columns=['loyalty_card_number'], inplace=True)
     return df
 
 
 def add_age(df):
     """
-    Pass customer_birthdate into age and drop the raw birthdate column.
-    Has integrated safety measures by AI due to problems during development.
+    Pass customer_birthdate into age and drop the birthdate column.
     """
-    birthdate = df['customer_birthdate']
-    bd_datetime = pd.to_datetime(birthdate, format='%m/%d/%Y %I:%M %p', errors='coerce')
-
-    missing = bd_datetime.isna()
-    if missing.any():
-        fallback = pd.to_datetime(birthdate.loc[missing], format='mixed', errors='coerce')
-        bd_datetime.loc[missing] = fallback
-
-    age = current_year - bd_datetime.dt.year
-
-    # Last resort: extract a 4-digit year directly from the raw string
-    birth_year = pd.to_numeric(
-        birthdate.astype(str).str.extract(r'(\d{4})', expand=False),
-        errors='coerce',
+    birthdate = pd.to_datetime(
+        df['customer_birthdate'], 
+        format='mixed', 
+        errors='coerce'
     )
-    age = age.fillna(current_year - birth_year)
-    age = age.mask((age < 0) | (age > 120))
-
-    median_age = age.median()
-    if pd.isna(median_age):
-        raise ValueError('Could not derive age from customer_birthdate.')
-
-    df['age'] = age.fillna(median_age)
-    df = df.drop(columns=['customer_birthdate'])
+    age = current_year - birthdate.dt.year
+    df['age'] = age
+    df = df.drop(columns=['customer_birthdate'], inplace=True)
     return df
 
 
@@ -110,6 +151,39 @@ def add_gender(df):
     Binary gender flag where 1 = female and 0 = male
     """
     df['is_female'] = (df['customer_gender'] == 'female').astype(int)
+    return df
+
+
+def add_education(df):
+    """
+    Ordinal education level extracted from customer_name
+    No Degree = 0, Bsc = 1, Msc = 2, Phd = 3
+    """
+    order = {'No Degree': 0, 'Bsc': 1, 'Msc': 2, 'Phd': 3}
+    degree = (
+        df['customer_name']
+        .str.extract(r'^(Bsc|Msc|Phd)\.', expand=False)
+        .fillna('No Degree'))
+    df['education_level'] = degree.map(order)
+    return df
+
+
+def add_dietary_preferences(df):
+    """
+    Derive dietary preference binary flags based on meat and fish lifetime spend.
+    - vegetarian: no meat, no fish
+    - pescatarian: no meat, buys fish
+    - carnivore: buys meat, no fish
+    - omnivore: buys both
+    """
+    meat = df['lifetime_spend_meat']
+    fish = df['lifetime_spend_fish']
+    
+    df['vegetarian'] = ((meat < 15) & (fish < 15)).astype(int)
+    df['pescatarian'] = ((meat < 15) & (fish >= 15)).astype(int)
+    df['carnivore'] = ((meat >= 15) & (fish < 15)).astype(int)
+    df['omnivore'] = ((meat >= 15) & (fish >= 15)).astype(int)
+    
     return df
 
 
@@ -173,11 +247,13 @@ def preprocessing(df_raw):
         3. clean_loyalty_card         - binary has_loyalty_card flag
         4. add_age                    - derive age, drop raw birthdate
         5. add_gender                 - binary is_female flag
-        6. add_dependants             - kids_home + teens_home
-        7. add_tenure                 - years since first transaction
-        8. add_total_spend            - sum of all spend categories
-        9. add_spend_shares           - per-category fraction of total spend
-       10. check_nulls                - raise if any feature column has NaN
+        6. add_education              - ordinal education level from name prefix (0–3)
+        7. add_dietary_preferences    - binary flags for veg/pescatarian/carnivore/omnivore
+        8. add_dependants             - kids_home + teens_home
+        9. add_tenure                 - years since first transaction
+        10. add_total_spend            - sum of all spend categories
+        11. add_spend_shares           - per-category fraction of total spend
+        12. check_nulls                - raise if any feature column has NaN
     """
     df = df_raw.copy()
 
@@ -186,6 +262,8 @@ def preprocessing(df_raw):
     df = clean_loyalty_card(df)
     df = add_age(df)
     df = add_gender(df)
+    df = add_education(df)
+    df = add_dietary_preferences(df)
     df = add_dependants(df)
     df = add_tenure(df)
     df = add_total_spend(df)
@@ -197,7 +275,6 @@ def preprocessing(df_raw):
 
 
 # Scaling
-
 def scale_features(df_features):
     """
     Scale FEATURE_COLS with RobustScaler.

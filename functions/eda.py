@@ -10,6 +10,8 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.gridspec import GridSpec
 from shapely.geometry import Point
+from sklearn.neighbors import NearestNeighbors
+from sklearn.cluster import DBSCAN
 
 
 # Columns with lifetime_spend_, for convenience in EDA and preprocessing
@@ -81,26 +83,13 @@ def plot_demographics(df):
     """
     Age distribution, gender split, education level, household size
     """
-
     df = df.copy()
-
-    # Age
-    df["customer_birthdate"] = pd.to_datetime(
-        df["customer_birthdate"], format="%m/%d/%Y %I:%M %p", errors="coerce"
-    )
-    df["age"] = 2026 - df["customer_birthdate"].dt.year
 
     # Education
     df["education_level"] = (
         df["customer_name"]
         .str.extract(r"^(Bsc|Msc|Phd)\.", expand=False)
-        .fillna("No Degree")
-    )
-
-    # Household size
-    df["kids_home"]   = df["kids_home"].fillna(0)
-    df["teens_home"]  = df["teens_home"].fillna(0)
-    df["household_size"] = df["kids_home"] + df["teens_home"]
+        .fillna("No Degree"))
 
     fig = plt.figure(figsize=(14, 8), facecolor=BG_COLOR)
     fig.suptitle("Customer Demographics", fontsize=14, fontweight="bold", y=1.01)
@@ -108,10 +97,8 @@ def plot_demographics(df):
 
     # Age distribution
     ax1 = fig.add_subplot(gs[0, 0])
-    sns.histplot(df["age"].dropna(), bins=30, kde=True,
-                 color=ACCENT, ax=ax1, edgecolor="white", linewidth=0.4)
-    ax1.axvline(df["age"].median(), color=ACCENT2, linestyle="--", linewidth=1.5,
-                label=f"Median: {df['age'].median():.0f}")
+    sns.histplot(df["age"].dropna(), discrete=True,bins=30, color=ACCENT, ax=ax1, edgecolor="white", linewidth=0.4)
+    ax1.axvline(df["age"].median(), color=ACCENT2, linestyle="--", linewidth=1.5, label=f"Median: {df['age'].median():.0f}")
     ax1.set_title("Age Distribution")
     ax1.set_xlabel("Age (years)")
     ax1.set_ylabel("Count")
@@ -127,8 +114,8 @@ def plot_demographics(df):
         autopct="%1.1f%%",
         colors=colors,
         startangle=90,
-        wedgeprops=dict(edgecolor="white", linewidth=1.5),
-    )
+        wedgeprops=dict(edgecolor="white", linewidth=1.5))
+    
     for t in autotexts:
         t.set_fontsize(10)
     ax2.set_title("Gender Split")
@@ -137,8 +124,7 @@ def plot_demographics(df):
     ax3 = fig.add_subplot(gs[1, 0])
     edu_order = ["No Degree", "Bsc", "Msc", "Phd"]
     edu_counts = df["education_level"].value_counts().reindex(edu_order)
-    bars = ax3.bar(edu_counts.index, edu_counts.values,
-                   color=[ACCENT, ACCENT2, "#457B9D", "#A8DADC"],
+    bars = ax3.bar(edu_counts.index, edu_counts.values, color=[ACCENT, ACCENT2, "#457B9D", "#A8DADC"],
                    edgecolor="white", linewidth=0.5)
     for bar in bars:
         ax3.text(bar.get_x() + bar.get_width() / 2,
@@ -148,15 +134,13 @@ def plot_demographics(df):
     ax3.set_title("Education Level")
     ax3.set_ylabel("Customers")
 
-    # Household size 
+    # Dependants 
     ax4 = fig.add_subplot(gs[1, 1])
-    hh_counts = df["household_size"].value_counts().sort_index()
-    ax4.bar(hh_counts.index.astype(int), hh_counts.values,
-            color=ACCENT, edgecolor="white", linewidth=0.5)
-    ax4.set_title("Household Size (kids + teens)")
+    hh_counts = df["dependants"].value_counts().sort_index()
+    ax4.bar(hh_counts.index.astype(int), hh_counts.values, color=ACCENT, edgecolor="white", linewidth=0.5)
+    ax4.set_title("Dependencies (kids + teens)")
     ax4.set_xlabel("Number of dependants")
     ax4.set_ylabel("Customers")
-    ax4.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
 
     fig.tight_layout()
     plt.show()
@@ -171,7 +155,6 @@ def plot_customer_behavior(df):
 
     df = df.copy()
     df["customer_tenure"] = 2026 - df["year_first_transaction"].clip(upper=2026)
-    df["has_loyalty_card"] = df["loyalty_card_number"].notna()
     df["number_complaints"] = df["number_complaints"].fillna(0)
     df["typical_hour"] = df["typical_hour"].fillna(df["typical_hour"].median())
     df["percentage_of_products_bought_promotion"] = (
@@ -185,8 +168,7 @@ def plot_customer_behavior(df):
 
     # Customer tenure
     ax1 = fig.add_subplot(gs[0, 0])
-    sns.histplot(df["customer_tenure"].dropna(), bins=25, kde=True,
-                 color=ACCENT, ax=ax1, edgecolor="white", linewidth=0.4)
+    sns.histplot(df["customer_tenure"].dropna(), bins=25, kde=True, color=ACCENT, ax=ax1, edgecolor="white", linewidth=0.4)
     ax1.set_title("Customer Tenure (years)")
     ax1.set_xlabel("Years as customer")
     ax1.set_ylabel("Count")
@@ -197,8 +179,7 @@ def plot_customer_behavior(df):
     ax2.bar(["No Card", "Has Card"], lc_counts.reindex([False, True]).values,
             color=[ACCENT2, ACCENT], edgecolor="white")
     for i, v in enumerate(lc_counts.reindex([False, True]).values):
-        ax2.text(i, v + 100, f"{v:,}\n({v/len(df)*100:.0f}%)",
-                 ha="center", fontsize=9)
+        ax2.text(i, v + 100, f"{v:,}\n({v/len(df)*100:.0f}%)", ha="center", fontsize=9)
     ax2.set_title("Loyalty Card Ownership")
     ax2.set_ylabel("Customers")
 
@@ -224,8 +205,7 @@ def plot_customer_behavior(df):
 
     # Promotions % distribution
     ax5 = fig.add_subplot(gs[1, 1])
-    sns.histplot(df["percentage_of_products_bought_promotion"] * 100,
-                 bins=30, kde=True, color="#457B9D", ax=ax5,
+    sns.histplot(df["percentage_of_products_bought_promotion"] * 100,bins=30, kde=True, color="#457B9D", ax=ax5,
                  edgecolor="white", linewidth=0.4)
     ax5.set_title("% Products Bought on Promotion")
     ax5.set_xlabel("Promotion %")
@@ -335,19 +315,18 @@ def plot_spend_analysis(df):
 def plot_geographic_distribution(df):
     """
     GeoPandas map of customer home locations overlaid on a CartoDB basemap
-    (via contextily). Axes show WGS-84 latitude / longitude degrees.
+    Axes show WGS-84 latitude / longitude degrees.
     """
     from pyproj import Transformer
 
     df = df.copy()
 
-    # ── Build GeoDataFrame (WGS-84) then reproject to Web Mercator ──────────
-    geometry = [Point(lon, lat)
-                for lon, lat in zip(df["longitude"], df["latitude"])]
+    # Build GeoDataFrame (WGS-84) then reproject to Web Mercator
+    geometry = [Point(lon, lat) for lon, lat in zip(df["longitude"], df["latitude"])]
     gdf = gpd.GeoDataFrame(df, geometry=geometry, crs="EPSG:4326")
     gdf_merc = gdf.to_crs(epsg=3857)
 
-    # ── Single panel map ─────────────────────────────────────────────────────
+    # Single panel map 
     fig, ax_map = plt.subplots(figsize=(10, 9), facecolor=BG_COLOR)
     fig.suptitle(
         "Geographic Distribution of Customers",
@@ -364,7 +343,7 @@ def plot_geographic_distribution(df):
         linewidths=0,
     )
 
-    # ── Zoom out 20% around the data extent ──────────────────────────────────
+    # Zoom out 20% 
     x_min, y_min, x_max, y_max = gdf_merc.total_bounds
     x_pad = (x_max - x_min) * 0.20
     y_pad = (y_max - y_min) * 0.20
@@ -390,9 +369,9 @@ def plot_geographic_distribution(df):
                 attribution_size=6,
             )
         except Exception:
-            pass   # No network – map still shows without tiles
+            pass  
 
-    # ── Convert Web Mercator tick positions → lat/lon for axis labels ─────────
+    # Convert Web Mercator tick positions → lat/lon for axis labels 
     transformer = Transformer.from_crs("EPSG:3857", "EPSG:4326", always_xy=True)
 
     x_ticks = ax_map.get_xticks()
@@ -473,11 +452,11 @@ def plot_basket_analysis(df, top_n: int = 20):
 
 
 
-def plot_correlation_heatmap(df_features, feature_cols):
+def plot_correlation_heatmap(df, feature_cols):
     """
     Lower-triangle correlation heatmap of the engineered feature set
     """
-    corr = df_features[feature_cols].corr()
+    corr = df[feature_cols].corr()
     mask = np.triu(np.ones_like(corr, dtype=bool))
 
     fig, ax = plt.subplots(figsize=(14, 11), facecolor=BG_COLOR)
@@ -491,4 +470,90 @@ def plot_correlation_heatmap(df_features, feature_cols):
     ax.tick_params(axis="y", labelsize=7)
 
     fig.tight_layout()
+    plt.show()
+    return corr
+
+
+def plot_high_correlations(df, threshold=0.5, max_plots=6):
+    """
+    Automatically finds feature pairs with absolute correlation > threshold 
+    and plots individual scatterplots for the top pairs to analyze point distributions
+    """
+    corr = df.corr()
+    pairs = corr.unstack()
+    high_corr = pairs[(abs(pairs) > threshold) & (pairs != 1.0)].drop_duplicates()
+    
+    # Sort by absolute correlation magnitude
+    high_corr = high_corr.reindex(high_corr.abs().sort_values(ascending=False).index)
+    
+    if len(high_corr) == 0:
+        print(f"No correlations above {threshold} found.")
+        return
+        
+    n_plots = min(len(high_corr), max_plots)
+    
+    for i, (idx, val) in enumerate(high_corr.head(n_plots).items()):
+        var1, var2 = idx
+        
+        # Create a separate, large figure for each pair
+        fig, ax = plt.subplots(figsize=(10, 7), facecolor=BG_COLOR)
+        
+        sns.scatterplot(data=df, x=var1, y=var2, ax=ax, color=ACCENT, alpha=0.4, s=30, edgecolor="none")
+        ax.set_title(f"{var1} vs {var2}  (r = {val:.2f})", fontweight="bold", pad=15)
+        
+        fig.tight_layout()
+        plt.show()
+
+def plot_k_distance(data, k):
+    """
+    Plots the k-distance graph to help find the optimal 'eps' for DBSCAN.
+    """
+    nbr = NearestNeighbors(n_neighbors=k)
+    nbrs = nbr.fit(data)
+    distances, indices = nbrs.kneighbors(data)
+    # Sort the distances to the k nearest neighbor
+    distances = np.sort(distances[:, k-1], axis=0)
+    
+    plt.figure(figsize=(10, 6), facecolor=BG_COLOR)
+    plt.plot(distances, color=ACCENT)
+    plt.xlabel('Points sorted by distance')
+    plt.ylabel(f'{k}-th Nearest Neighbor Distance')
+    plt.title(f'K-distance Graph for k = {k}', fontweight='bold')
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+def detect_outliers_dbscan(data, eps, min_samples):
+    """
+    Detect outliers in the data using DBSCAN.
+    Returns the data with an additional 'outlier' boolean column.
+    """
+    data = data.copy()
+    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
+    dbscan.fit(data)
+    
+    data['cluster'] = dbscan.labels_
+    # Points labeled as -1 are outliers
+    data['outlier'] = data['cluster'] == -1
+    
+    print(f"Detected {data['outlier'].sum()} outliers out of {len(data)} points.")
+    return data
+
+def visualize_outliers_vs_normal(data_outliers, feature1, feature2, n_samples=None):
+    """
+    Visualize normal data vs outliers for two chosen features
+    """
+    outliers = data_outliers[data_outliers['outlier']]
+    normal = data_outliers[~data_outliers['outlier']]
+    
+    if n_samples is not None and len(outliers) > n_samples:
+        outliers = outliers.sample(n=n_samples, random_state=42)
+        
+    plt.figure(figsize=(10, 7), facecolor=BG_COLOR)
+    plt.scatter(normal[feature1], normal[feature2], c=ACCENT, alpha=0.3, label='Normal Data', s=15, edgecolor='none')
+    plt.scatter(outliers[feature1], outliers[feature2], c=ACCENT2, alpha=1.0, label='Outliers', s=25, edgecolor='black')
+    
+    plt.xlabel(feature1)
+    plt.ylabel(feature2)
+    plt.title(f'Outliers vs Normal: {feature1} & {feature2}', fontweight='bold')
+    plt.legend()
     plt.show()
