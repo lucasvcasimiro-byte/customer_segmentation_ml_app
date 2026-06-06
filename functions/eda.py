@@ -522,14 +522,16 @@ def plot_k_distance(data, k):
     plt.grid(True, alpha=0.3)
     plt.show()
 
-def detect_outliers_dbscan(data, eps, min_samples):
+def detect_outliers_dbscan(data, scaled_data, eps, min_samples):
     """
     Detect outliers in the data using DBSCAN.
-    Returns the data with an additional 'outlier' boolean column.
+    Fits DBSCAN on `scaled_data` and returns the original `data` 
+    with an additional 'outlier' boolean column.
     """
     data = data.copy()
+        
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-    dbscan.fit(data)
+    dbscan.fit(scaled_data)
     
     data['cluster'] = dbscan.labels_
     # Points labeled as -1 are outliers

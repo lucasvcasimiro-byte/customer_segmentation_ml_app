@@ -84,7 +84,7 @@ FEATURE_COLS =[
     'total_spend',
 
     # Spend shares
-    # 'share_groceries',       #Might be removed
+    'share_groceries',       #Might be removed
     'share_electronics',
     'share_vegetables',
     'share_nonalcohol_drinks',
