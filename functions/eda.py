@@ -466,7 +466,7 @@ def plot_correlation_heatmap(df, feature_cols):
         cbar_kws={"shrink": 0.8}, ax=ax,
     )
     ax.set_title("Feature Correlation Heatmap", fontweight="bold", pad=14)
-    ax.tick_params(axis="x", rotation=45, labelsize=7)
+    ax.tick_params(axis="x", rotation=90, labelsize=7)
     ax.tick_params(axis="y", labelsize=7)
 
     fig.tight_layout()
