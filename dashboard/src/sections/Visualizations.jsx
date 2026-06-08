@@ -33,14 +33,14 @@ export default function Visualizations() {
       hovertemplate: '<b>k = %{x}</b><br>WCSS: %{y:,.0f}<extra></extra>',
     },
     {
-      // Vertical marker at the "elbow" — k=6
+      // Vertical marker at the "elbow" — k=7
       type:  'scatter',
       mode:  'markers',
-      x:     [6],
-      y:     [elbowData.wcss[elbowData.k.indexOf(6)]],
+      x:     [7],
+      y:     [elbowData.wcss[elbowData.k.indexOf(7)]],
       name:  '★ Optimal k',
       marker:{ color: '#f59e0b', size: 14, symbol: 'star', line: { color: '#fff', width: 1.5 } },
-      hovertemplate: '<b>Optimal k = 6</b><br>WCSS: %{y:,.0f}<extra></extra>',
+      hovertemplate: '<b>Optimal k = 7</b><br>WCSS: %{y:,.0f}<extra></extra>',
     },
   ], [])
 
@@ -58,7 +58,7 @@ export default function Visualizations() {
       y:           silhouetteByK.scores,
       name:        'Silhouette Score',
       marker: {
-        color:   silhouetteByK.k.map(k => k === 6 ? '#7c3aed' : '#2dd4bf'),
+        color:   silhouetteByK.k.map(k => k === 7 ? '#7c3aed' : '#2dd4bf'),
         opacity: 0.85,
       },
       hovertemplate: '<b>k = %{x}</b><br>Silhouette: %{y:.3f}<extra></extra>',
@@ -141,7 +141,7 @@ export default function Visualizations() {
           {/* 1 — Elbow Method */}
           <InteractivePlot
             title="Elbow Method — WCSS vs k"
-            description="Within-Cluster Sum of Squares (inertia) decreases as k grows. The 'elbow' at k=6 (★) marks the point of diminishing returns — our optimal cluster count."
+            description="Within-Cluster Sum of Squares (inertia) decreases as k grows. The 'elbow' at k=7 (★) marks the point of diminishing returns — our optimal cluster count."
             data={elbowTraces}
             layout={{
               xaxis: { title: { text: 'Number of Clusters (k)', font: { color: '#64748b' } }, dtick: 1 },
@@ -154,7 +154,7 @@ export default function Visualizations() {
           {/* 2 — Silhouette Score per k */}
           <InteractivePlot
             title="Silhouette Score vs k"
-            description="Silhouette score measures cluster cohesion and separation (−1 to 1, higher is better). k=6 achieves 0.101, which balances segment separation and model complexity."
+            description="Silhouette score measures cluster cohesion and separation (−1 to 1, higher is better). k=7 achieves 0.132, which balances segment separation and model complexity."
             data={silTraces}
             layout={{
               xaxis: { title: { text: 'Number of Clusters (k)', font: { color: '#64748b' } }, dtick: 1 },
