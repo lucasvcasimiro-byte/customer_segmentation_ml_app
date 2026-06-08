@@ -77,8 +77,8 @@ CLUSTER_SEGMENTS = {
         'segment': 'Vegans',
         'discount': '15%',
         'nextBestOffer': '15% off Organic Vegetables Subscription',
-        'campaignItems': ['napkins', 'babies food', 'cooking oil'],
-        'items': ['napkins', 'babies food', 'cooking oil'],
+        'campaignItems': ['salad', 'tomatoes', 'carrots', 'frozen vegetables'],
+        'items': ['salad', 'tomatoes', 'carrots', 'frozen vegetables'],
         'propensity': 0.88
     },
     1: {
@@ -117,8 +117,8 @@ CLUSTER_SEGMENTS = {
         'segment': 'Karens',
         'discount': '10%',
         'nextBestOffer': '10% off Next Purchase & Priority Support',
-        'campaignItems': ['salad', 'tomatoes', 'carrots', 'frozen vegetables'],
-        'items': ['salad', 'tomatoes', 'carrots', 'frozen vegetables'],
+        'campaignItems': ['napkins', 'babies food', 'cooking oil'],
+        'items': ['napkins', 'babies food', 'cooking oil'],
         'propensity': 0.65
     },
     6: {

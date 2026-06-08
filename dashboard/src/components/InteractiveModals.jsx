@@ -306,8 +306,24 @@ export function SupportModal({ onClose }) {
       a: 'Com base na análise do Silhouette Score e da Inércia (método do cotovelo), o valor ideal determinado para este conjunto de dados foi k=7. Esse valor equilibra perfeitamente a coesão interna com a separação dos grupos.'
     },
     {
+      q: 'Como foi feito o pré-processamento e limpeza dos dados?',
+      a: 'Limpámos registos com valores nulos ou logicamente inconsistentes nos notebooks de EDA. Identificámos e retirámos clientes institucionais/empresariais que agiam como outliers (valores e volumes de compra massivos), focando a análise nos consumidores finais.'
+    },
+    {
+      q: 'Porque escolheram o RobustScaler para escalar os dados?',
+      a: 'Como o histórico de compras e valor gasto têm distribuições muito enviesadas e com caudas longas (outliers), o StandardScaler seria distorcido pelas observações extremas. O RobustScaler utiliza a mediana e o intervalo interquartílico (IQR), mitigando a influência de grandes outliers.'
+    },
+    {
+      q: 'Como funciona a Principal Component Analysis (PCA) neste projeto?',
+      a: 'Usámos o PCA para reduzir as 10+ variáveis de comportamento e perfil de compra a apenas 3 componentes principais. Isto permitiu explicar a maior parte da variabilidade dos dados e projetar o gráfico de dispersão 3D, onde a separação em 7 clusters é perfeitamente visível.'
+    },
+    {
+      q: 'Como funciona a recomendação por Regras de Associação (Apriori)?',
+      a: 'Corremos o algoritmo Apriori para cada cluster separadamente nos notebooks. Ajustando limiares de suporte e confiança mínimos específicos por grupo (e.g. suporte de 2% para Loyal Core, mas 0.4% para Gamers devido ao tamanho do cluster), extraímos regras fortes como "Airpods -> Iphone" para sugerir itens adicionais no carrinho!'
+    },
+    {
       q: 'Quem são os criadores deste projeto?',
-      a: 'Este projeto foi desenvolvido por três alunos da Licenciatura em Ciência de Dados da NOVA IMS: Afonso Lima, Lucas Casimiro e Lince Silva, combinando modelação estatística com design de interfaces moderno.'
+      a: 'Este projeto foi desenvolvido por três alunos da Licenciatura em Ciência de Dados da NOVA IMS: Afonso Lince, Lourenço Lima e Lucas Casemiro, combinando modelação estatística com design de interfaces moderno.'
     },
     {
       q: 'O Professor Ivo vai dar-nos um 20?',
@@ -410,19 +426,19 @@ export function SupportModal({ onClose }) {
 export function AboutUsModal({ onClose }) {
   const students = [
     {
-      name: 'Lucas Casimiro',
+      name: 'Lucas Casemiro',
       role: 'ML & Basket Engineer',
       desc: 'O cérebro das regras de associação. Passou noites a afinar o Apriori para garantir que os clientes vegetarianos não recebessem sugestões de salsichas... a menos que fossem de soja!',
       color: 'var(--purple)'
     },
     {
-      name: 'Afonso Lima',
+      name: 'Lourenço Lima',
       role: 'Data & Analytics Guru',
       desc: 'O mestre dos gráficos interativos. Transformou coordenadas do PCA em arte visual tridimensional para que qualquer pessoa consiga ver a alma de um Premium Loyalist.',
       color: 'var(--teal)'
     },
     {
-      name: 'Lince Silva',
+      name: 'Afonso Lince',
       role: 'UX & Frontend Architect',
       desc: 'O designer de interações. Adicionou a roleta, o captcha anti-robô e o chat para provar que a Ciência de Dados e o design andam sempre de mãos dadas.',
       color: 'var(--amber)'
