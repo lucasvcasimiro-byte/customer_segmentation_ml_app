@@ -4,46 +4,46 @@ from mlxtend.preprocessing import TransactionEncoder
 from mlxtend.frequent_patterns import apriori, association_rules
 
 
-def merge_basket_with_clusters(
-    customer_basket,
-    customer,
-    cluster_col='final_cluster_label',
-    join_col='customer_id'
+def safe_parse_goods(x):
+    if isinstance(x, list):
+        return x
+    try:
+        return ast.literal_eval(x)
+    except:
+        return []
+
+
+def generate_association_rules(
+    customers,
+    basket,
+    join_column="customer_id",
+    list_column="list_of_goods",
+    min_support=0.01,
+    metric="lift",
+    min_threshold=1,
+    min_confidence=0.10
 ):
-    return pd.merge(
-        customer_basket,
-        customer[[join_col, cluster_col]],
-        on=join_col,
-        how='inner'
+    data = basket.merge(
+        customers[[join_column]],
+        on=join_column,
+        how="inner"
     )
 
+    data[list_column] = data[list_column].apply(safe_parse_goods)
 
-def split_by_cluster(df, cluster_col='final_cluster_label'):
-    return {
-        cluster: group.reset_index(drop=True)
-        for cluster, group in df.groupby(cluster_col)
-    }
+    transactions = data[list_column].tolist()
+    transactions = [t for t in transactions if len(t) > 0]
 
+    if len(transactions) == 0:
+        return pd.DataFrame()
 
-def generate_association_rules_from_cluster(
-    cluster_df,
-    list_column='list_of_goods',
-    min_support=0.02,
-    metric='lift',
-    min_threshold=1
-):
-    transactions = cluster_df[list_column].apply(ast.literal_eval)
+    te = TransactionEncoder()
+    encoded = te.fit(transactions).transform(transactions)
 
-    transaction_encoder = TransactionEncoder()
-    te_array = transaction_encoder.fit(transactions).transform(transactions)
-
-    transaction_items = pd.DataFrame(
-        te_array,
-        columns=transaction_encoder.columns_
-    )
+    basket_encoded = pd.DataFrame(encoded, columns=te.columns_)
 
     frequent_itemsets = apriori(
-        transaction_items,
+        basket_encoded,
         min_support=min_support,
         use_colnames=True
     )
@@ -57,21 +57,44 @@ def generate_association_rules_from_cluster(
         min_threshold=min_threshold
     )
 
-    if rules.empty:
-        return pd.DataFrame()
+    rules = rules[rules["confidence"] >= min_confidence]
 
-    if only_simple_rules:
-        rules = rules[
-            (rules['antecedents'].apply(len) == 1) &
-            (rules['consequents'].apply(len) == 1)
-        ].copy()
-
-    rules['antecedent_item'] = rules['antecedents'].apply(lambda x: list(x)[0])
-    rules['consequent_item'] = rules['consequents'].apply(lambda x: list(x)[0])
-
-    rules['promotion_idea'] = rules.apply(
-        lambda row: f"Buy {row['antecedent_item']} and get a discount on {row['consequent_item']}",
-        axis=1
+    return (
+        rules[["antecedents", "consequents", "support", "confidence", "lift"]]
+        .sort_values("lift", ascending=False)
+        .reset_index(drop=True)
     )
 
-    return rules.sort_values('lift', ascending=False).reset_index(drop=True)
+
+def generate_rules_for_all_clusters(
+    cluster_dataframes,
+    basket,
+    params_by_cluster,
+    metric="lift",
+    default_params=None
+):
+    if default_params is None:
+        default_params = {
+            "min_support": 0.01,
+            "min_threshold": 1,
+            "min_confidence": 0.10
+        }
+
+    all_cluster_rules = {}
+
+    for cluster_name, cluster_df in cluster_dataframes.items():
+
+        params = params_by_cluster.get(cluster_name, default_params)
+
+        rules = generate_association_rules(
+            customers=cluster_df,
+            basket=basket,
+            min_support=params["min_support"],
+            metric=metric,
+            min_threshold=params["min_threshold"],
+            min_confidence=params["min_confidence"]
+        )
+
+        all_cluster_rules[cluster_name] = rules
+
+    return all_cluster_rules
