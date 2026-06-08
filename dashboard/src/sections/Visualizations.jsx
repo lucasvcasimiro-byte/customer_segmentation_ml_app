@@ -180,42 +180,48 @@ export default function Visualizations() {
             />
           </div>
 
-          {/* 4 — Per-cluster silhouette */}
-          <InteractivePlot
-            title="Average Silhouette per Cluster"
-            description="Premium Large Families and Groceries Heavy Omnivores are the most tightly clustered. Promo-Sensitive Shoppers show lower cohesion, suggesting potential overlap."
-            data={silSampleTraces}
-            layout={{
-              xaxis: { title: { text: 'Avg Silhouette Score', font: { color: '#64748b' } }, range: [0, 0.25] },
-              showlegend: false,
-              bargap:     0.4,
-            }}
-          />
+          {/* 4 — Average Silhouette per Cluster */}
+          <div className="viz-wide">
+            <InteractivePlot
+              title="Average Silhouette per Cluster"
+              description="Big families (big spenders) and Gamers are the most tightly clustered. Bargain hunters show lower cohesion, suggesting potential overlap."
+              data={silSampleTraces}
+              layout={{
+                xaxis: { title: { text: 'Avg Silhouette Score', font: { color: '#64748b' } }, range: [0, 0.25] },
+                margin: { l: 180, r: 40, t: 20, b: 40 },
+                showlegend: false,
+                bargap:     0.4,
+              }}
+            />
+          </div>
 
           {/* 5 — Feature importance (placeholder) */}
-          <InteractivePlot
-            title="Feature Importance for Clustering"
-            description="Variance explained by each feature after scaling. Features with high variance contribute more to cluster differentiation. TODO: replace with your PCA loadings or ANOVA F-scores."
-            data={[{
-              // TODO: replace with real feature importance from notebook
-              type:        'bar',
-              x:           [0.31, 0.26, 0.19, 0.14, 0.10],
-              y:           ['Recency (days)', 'Avg Spend (€)', 'Purchase Frequency', 'Product Variety', 'Promo Sensitivity'],
-              orientation: 'h',
-              marker: {
-                color:   ['#7c3aed','#7c3aed','#2dd4bf','#2dd4bf','#94a3b8'],
-                opacity: 0.85,
-              },
-              text:        ['31%','26%','19%','14%','10%'],
-              textposition:'outside',
-              hovertemplate: '<b>%{y}</b><br>Importance: %{x:.0%}<extra></extra>',
-            }]}
-            layout={{
-              xaxis:      { title: { text: 'Relative Importance', font: { color: '#64748b' } }, tickformat: '.0%' },
-              showlegend: false,
-              bargap:     0.35,
-            }}
-          />
+          <div className="viz-wide">
+            <InteractivePlot
+              title="Feature Importance for Clustering"
+              description="Variance explained by each feature after scaling. Features with high variance contribute more to cluster differentiation. TODO: replace with your PCA loadings or ANOVA F-scores."
+              data={[{
+                // TODO: replace with real feature importance from notebook
+                type:        'bar',
+                x:           [0.31, 0.26, 0.19, 0.14, 0.10],
+                y:           ['Recency (days)', 'Avg Spend (€)', 'Purchase Frequency', 'Product Variety', 'Promo Sensitivity'],
+                orientation: 'h',
+                marker: {
+                  color:   ['#7c3aed','#7c3aed','#2dd4bf','#2dd4bf','#94a3b8'],
+                  opacity: 0.85,
+                },
+                text:        ['31%','26%','19%','14%','10%'],
+                textposition:'outside',
+                hovertemplate: '<b>%{y}</b><br>Importance: %{x:.0%}<extra></extra>',
+              }]}
+              layout={{
+                xaxis:      { title: { text: 'Relative Importance', font: { color: '#64748b' } }, tickformat: '.0%' },
+                margin:     { l: 140, r: 40, t: 20, b: 40 },
+                showlegend: false,
+                bargap:     0.35,
+              }}
+            />
+          </div>
 
         </div>
       </div>
