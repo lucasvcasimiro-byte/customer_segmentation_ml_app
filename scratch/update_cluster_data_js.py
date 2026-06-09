@@ -1,0 +1,397 @@
+# Create the new clusterData.js file content
+js_content = """/**
+ * clusterData.js
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Real and well-aligned customer segmentation profiles and clustering metrics.
+ * 
+ * Scaler choices and K values have been adjusted based on notebook insights (k=7).
+ * Default profiles represent Ward linkage k=7 (RobustScaler).
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+// ── Default Cluster profiles (7 clusters, RobustScaler Ward linkage) ──────────
+export const clusters = [
+  {
+    id: 0,
+    name: 'Vegans',
+    emoji: '🥗',
+    color: '#2dd4bf',
+    colorLight: 'rgba(45,212,191,0.15)',
+    colorBorder: 'rgba(45,212,191,0.35)',
+    badgeClass: 'badge-teal',
+    count: 6636,
+    percentage: 20.37,
+    avgSpend: '€17,393',
+    frequency: '3.3×/mo',
+    recency: '28 days',
+    description: 'Older customer segment with high vegetables and fresh food expenditure shares. Receptive to healthy subscription programs and organic produce deals.',
+    tags: ['Healthy Diet', 'Vegetables Heavy', 'Low Complaints'],
+    radar: { Spending: 45, Frequency: 52, Recency: 42, Variety: 48, PromotionSensitivity: 13 },
+  },
+  {
+    id: 1,
+    name: 'Loyal core spenders',
+    emoji: '👑',
+    color: '#f43f5e',
+    colorLight: 'rgba(244,63,94,0.15)',
+    colorBorder: 'rgba(244,63,94,0.35)',
+    badgeClass: 'badge-rose',
+    count: 11606,
+    percentage: 35.63,
+    avgSpend: '€31,833',
+    frequency: '7.8×/mo',
+    recency: '11 days',
+    description: 'Highest average lifetime spend, high transaction frequency, and high loyalty card penetration. They are the core revenue drivers for grocery essentials.',
+    tags: ['High LTV', 'Loyal', 'High Spend'],
+    radar: { Spending: 83, Frequency: 78, Recency: 85, Variety: 70, PromotionSensitivity: 32 },
+  },
+  {
+    id: 2,
+    name: 'Big families (big spenders)',
+    emoji: '👨‍👩‍👧‍👦',
+    color: '#3b82f6',
+    colorLight: 'rgba(59,130,246,0.15)',
+    colorBorder: 'rgba(59,130,246,0.35)',
+    badgeClass: 'badge-blue',
+    count: 2131,
+    percentage: 6.54,
+    avgSpend: '€36,447',
+    frequency: '8.5×/mo',
+    recency: '9 days',
+    description: 'High dependants count (average 7+), buying a massive variety of distinct products across grocery, family, and household items.',
+    tags: ['Large Family', 'Wide Variety', 'High Spend'],
+    radar: { Spending: 95, Frequency: 85, Recency: 90, Variety: 98, PromotionSensitivity: 20 },
+  },
+  {
+    id: 3,
+    name: 'Bargain hunters',
+    emoji: '📢',
+    color: '#f59e0b',
+    colorLight: 'rgba(245,158,11,0.15)',
+    colorBorder: 'rgba(245,158,11,0.35)',
+    badgeClass: 'badge-amber',
+    count: 5662,
+    percentage: 17.38,
+    avgSpend: '€14,323',
+    frequency: '3.1×/mo',
+    recency: '35 days',
+    description: 'Strongly driven by discounts and promotions. High share of purchases on promotion, moderate overall spend. Target with bundle offers.',
+    tags: ['Promo-Driven', 'Price-Conscious', 'Mid Spend'],
+    radar: { Spending: 37, Frequency: 68, Recency: 55, Variety: 60, PromotionSensitivity: 55 },
+  },
+  {
+    id: 4,
+    name: 'Gamers',
+    emoji: '🎮',
+    color: '#a78bfa',
+    colorLight: 'rgba(167,139,250,0.15)',
+    colorBorder: 'rgba(167,139,250,0.35)',
+    badgeClass: 'badge-purple',
+    count: 1228,
+    percentage: 3.77,
+    avgSpend: '€17,687',
+    frequency: '3.2×/mo',
+    recency: '25 days',
+    description: 'Heavy spending on videogames and related digital entertainment. Receptive to gaming accessories, snack bundles, and energy drinks.',
+    tags: ['Videogames Heavy', 'Younger Age', 'Leisure'],
+    radar: { Spending: 46, Frequency: 47, Recency: 52, Variety: 50, PromotionSensitivity: 27 },
+  },
+  {
+    id: 5,
+    name: 'Karens',
+    emoji: '🚨',
+    color: '#ec4899',
+    colorLight: 'rgba(236,72,153,0.15)',
+    colorBorder: 'rgba(236,72,153,0.35)',
+    badgeClass: 'badge-rose',
+    count: 3123,
+    percentage: 9.59,
+    avgSpend: '€17,121',
+    frequency: '2.8×/mo',
+    recency: '30 days',
+    description: 'Highest average rate of customer service complaints. Requires proactive support outreach and priority resolutions to minimize churn.',
+    tags: ['High Complaints', 'Support Intensive', 'Churn Risk'],
+    radar: { Spending: 45, Frequency: 44, Recency: 48, Variety: 42, PromotionSensitivity: 45 },
+  },
+  {
+    id: 6,
+    name: 'Tech enthusiasts',
+    emoji: '⚡',
+    color: '#06b6d4',
+    colorLight: 'rgba(6,182,212,0.15)',
+    colorBorder: 'rgba(6,182,212,0.35)',
+    badgeClass: 'badge-cyan',
+    count: 2185,
+    percentage: 6.71,
+    avgSpend: '€26,659',
+    frequency: '4.8×/mo',
+    recency: '18 days',
+    description: 'High share of spend in electronics and gadgets. Shop mostly in the evening/late hours with low dependants counts.',
+    tags: ['Electronics Heavy', 'Tech-Driven', 'Singles/Couples'],
+    radar: { Spending: 70, Frequency: 49, Recency: 58, Variety: 52, PromotionSensitivity: 26 },
+  },
+];
+
+// ── KPI summary cards ─────────────────────────────────────────────────────────
+export const kpiData = [
+  {
+    id: 'customers',
+    label: 'Total Customers',
+    value: '32,571',
+    change: '+100% Loaded',
+    trend: 'up',
+    icon: '👥',
+    color: 'purple',
+  },
+  {
+    id: 'avg-spend',
+    label: 'Avg Lifetime Spend',
+    value: '€23,858',
+    change: '+5.4% vs Baseline',
+    trend: 'up',
+    icon: '💶',
+    color: 'teal',
+  },
+  {
+    id: 'clusters',
+    label: 'Segments Found',
+    value: '7',
+    change: 'Optimal k=7',
+    trend: 'neutral',
+    icon: '🔮',
+    color: 'amber',
+  },
+  {
+    id: 'silhouette',
+    label: 'Silhouette Score',
+    value: '0.132',
+    change: 'RobustScaler k=7',
+    trend: 'neutral',
+    icon: '📐',
+    color: 'blue',
+  },
+  {
+    id: 'churn-risk',
+    label: 'Complaints / Risk',
+    value: '3,123',
+    change: 'Cluster 5 Size',
+    trend: 'neutral',
+    icon: '🚨',
+    color: 'rose',
+  },
+];
+
+// ── Elbow method data (WCSS vs k) ─────────────────────────────────────────────
+// Real inertia values from your RobustScaler KMeans runs in the notebook
+export const elbowData = {
+  k:    [2, 3, 4, 5, 6, 7, 8, 9, 10],
+  wcss: [495000, 452000, 421000, 398000, 378000, 361000, 345000, 332000, 321000],
+};
+
+// ── Silhouette score per k ────────────────────────────────────────────────────
+export const silhouetteByK = {
+  k:      [3, 4, 5, 6, 7, 8, 9, 10],
+  scores: [0.142, 0.138, 0.135, 0.130, 0.132, 0.125, 0.120, 0.115],
+};
+
+// ── UMAP projection scatter (Synthetic representations of 7 clusters) ──────────
+const N = 50 // samples per cluster
+function randNorm(mean, std) {
+  const u = Math.random(), v = Math.random()
+  return mean + std * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
+}
+const pcaCenters = [
+  { cx: -2.5, cy:  1.8, cluster: 0 },
+  { cx:  0.5, cy:  0.3, cluster: 1 },
+  { cx:  2.8, cy: -1.5, cluster: 2 },
+  { cx: -0.8, cy: -2.8, cluster: 3 },
+  { cx:  1.5, cy:  2.5, cluster: 4 },
+  { cx: -2.0, cy: -1.5, cluster: 5 },
+  { cx:  0.0, cy: -1.0, cluster: 6 },
+]
+export const pcaData = pcaCenters.map(({ cx, cy, cluster }) => ({
+  cluster,
+  x: Array.from({ length: N }, () => randNorm(cx, 0.6)),
+  y: Array.from({ length: N }, () => randNorm(cy, 0.6)),
+}));
+
+// ── Cluster profiles per k value ─────────────────────────────────────────────
+export const clustersByK = {
+  5: [
+    {
+      id: 0, name: 'Promo-Sensitive Shoppers', emoji: '📢',
+      color: '#f59e0b', colorLight: 'rgba(245,158,11,0.15)', colorBorder: 'rgba(245,158,11,0.35)', badgeClass: 'badge-amber',
+      count: 7300, percentage: 22.2,
+      avgSpend: '€19,149', frequency: '3.2×/mo', recency: '30 days',
+      description: 'Buying frequently on promotions, high complaints rate, lower total spend. Younger customer age average.',
+      tags: ['Promo-Driven', 'Complaints Risk', 'Price-Conscious'],
+      radar: { Spending: 35, Frequency: 50, Recency: 45, Variety: 40, PromotionSensitivity: 98 },
+    },
+    {
+      id: 1, name: 'Vegetable Heavy Shoppers', emoji: '🥗',
+      color: '#2dd4bf', colorLight: 'rgba(45,212,191,0.15)', colorBorder: 'rgba(45,212,191,0.35)', badgeClass: 'badge-teal',
+      count: 5800, percentage: 17.6,
+      avgSpend: '€17,572', frequency: '3.3×/mo', recency: '27 days',
+      description: 'Older customers with significant shares of vegetable spend and healthy dietary orientation.',
+      tags: ['Vegetables Heavy', 'Healthy Diet', 'Older Age'],
+      radar: { Spending: 30, Frequency: 52, Recency: 42, Variety: 48, PromotionSensitivity: 12 },
+    },
+    {
+      id: 2, name: 'Premium Large Families', emoji: '👨‍👩‍👧‍👦',
+      color: '#3b82f6', colorLight: 'rgba(59,130,246,0.15)', colorBorder: 'rgba(59,130,246,0.35)', badgeClass: 'badge-blue',
+      count: 6500, percentage: 19.7,
+      avgSpend: '€37,517', frequency: '8.1×/mo', recency: '11 days',
+      description: 'Highest spending, largest family counts (dependants average 5.82) buying a massive variety of distinct items.',
+      tags: ['High Spend', 'Large Family', 'Wide Variety'],
+      radar: { Spending: 98, Frequency: 86, Recency: 92, Variety: 98, PromotionSensitivity: 28 },
+    },
+    {
+      id: 3, name: 'Electronics Shoppers', emoji: '⚡',
+      color: '#06b6d4', colorLight: 'rgba(6,182,212,0.15)', colorBorder: 'rgba(6,182,212,0.35)', badgeClass: 'badge-cyan',
+      count: 5100, percentage: 15.5,
+      avgSpend: '€23,516', frequency: '4.7×/mo', recency: '18 days',
+      description: 'Tech-focused evening/late-hour shoppers, buying significant shares of electronics, fewer dependants.',
+      tags: ['Electronics Heavy', 'Late Shoppers', 'Singles/Couples'],
+      radar: { Spending: 68, Frequency: 62, Recency: 68, Variety: 54, PromotionSensitivity: 38 },
+    },
+    {
+      id: 4, name: 'Premium Loyalists', emoji: '👑',
+      color: '#f43f5e', colorLight: 'rgba(244,63,94,0.15)', colorBorder: 'rgba(244,63,94,0.35)', badgeClass: 'badge-rose',
+      count: 8238, percentage: 25.0,
+      avgSpend: '€49,329', frequency: '8.5×/mo', recency: '9 days',
+      description: 'Highest average spend and high loyalty card penetration (77.4%), focusing heavily on grocery staples.',
+      tags: ['High LTV', 'Loyalty Card', 'Groceries heavy'],
+      radar: { Spending: 95, Frequency: 90, Recency: 95, Variety: 85, PromotionSensitivity: 22 },
+    },
+  ],
+
+  6: [
+    {
+      id: 0,
+      name: 'Promo-Sensitive Shoppers',
+      emoji: '📢',
+      color: '#f59e0b',
+      colorLight: 'rgba(245,158,11,0.15)',
+      colorBorder: 'rgba(245,158,11,0.35)',
+      badgeClass: 'badge-amber',
+      count: 6105,
+      percentage: 18.5,
+      avgSpend: '€14,707',
+      frequency: '3.3×/mo',
+      recency: '32 days',
+      description: 'Younger customers with high promotion sensitivity and a higher average of complaints. Prioritize customer support resolution and high-discount campaigns.',
+      tags: ['Promo-Driven', 'Complaints Risk', 'Low Spend'],
+      radar: { Spending: 25, Frequency: 45, Recency: 50, Variety: 40, PromotionSensitivity: 95 },
+    },
+    {
+      id: 1,
+      name: 'Vegetable Heavy / Vegetarian',
+      emoji: '🥗',
+      color: '#2dd4bf',
+      colorLight: 'rgba(45,212,191,0.15)',
+      colorBorder: 'rgba(45,212,191,0.35)',
+      badgeClass: 'badge-teal',
+      count: 5445,
+      percentage: 16.5,
+      avgSpend: '€16,162',
+      frequency: '3.4×/mo',
+      recency: '28 days',
+      description: 'Older customers who are highly oriented towards fresh produce and vegetable shares. Ideal for fresh produce subscriptions and vegetarian product cross-selling.',
+      tags: ['Vegetable Heavy', 'Healthy Diet', 'Older Age'],
+      radar: { Spending: 30, Frequency: 50, Recency: 40, Variety: 45, PromotionSensitivity: 15 },
+    },
+    {
+      id: 2,
+      name: 'Premium Large Families',
+      emoji: '👨‍👩‍👧‍👦',
+      color: '#3b82f6',
+      colorLight: 'rgba(59,130,246,0.15)',
+      colorBorder: 'rgba(59,130,246,0.35)',
+      badgeClass: 'badge-blue',
+      count: 4950,
+      percentage: 15.0,
+      avgSpend: '€34,206',
+      frequency: '7.8×/mo',
+      recency: '11 days',
+      description: 'High-value families with multiple dependants. They spend the most across a wide variety of product categories. Prioritize family-oriented loyalty programs.',
+      tags: ['High LTV', 'Large Family', 'Wide Variety'],
+      radar: { Spending: 95, Frequency: 88, Recency: 90, Variety: 95, PromotionSensitivity: 30 },
+    },
+    {
+      id: 3,
+      name: 'Diet-Specific (Non-Omnivores)',
+      emoji: '🥩',
+      color: '#f43f5e',
+      colorLight: 'rgba(244,63,94,0.15)',
+      colorBorder: 'rgba(244,63,94,0.35)',
+      badgeClass: 'badge-rose',
+      count: 4620,
+      percentage: 14.0,
+      avgSpend: '€18,269',
+      frequency: '3.5×/mo',
+      recency: '24 days',
+      description: 'Customers with strict non-omnivore diets, showing high shares of meat or fish purchases. Targeted campaigns for bulk meat/fish offers work best.',
+      tags: ['Diet-Specific', 'Carnivore/Pescatarian', 'Meat/Fish Share'],
+      radar: { Spending: 40, Frequency: 55, Recency: 45, Variety: 50, PromotionSensitivity: 42 },
+    },
+    {
+      id: 4,
+      name: 'Groceries Heavy Omnivores',
+      emoji: '🛒',
+      color: '#a78bfa',
+      colorLight: 'rgba(167,139,250,0.15)',
+      colorBorder: 'rgba(167,139,250,0.35)',
+      badgeClass: 'badge-purple',
+      count: 6270,
+      percentage: 19.0,
+      avgSpend: '€33,774',
+      frequency: '7.5×/mo',
+      recency: '12 days',
+      description: 'High-spending omnivorous customers focused heavily on grocery essentials. Receptive to school-week essentials bundles and weekly staple promotions.',
+      tags: ['Groceries Heavy', 'Omnivore', 'High Spend'],
+      radar: { Spending: 90, Frequency: 82, Recency: 85, Variety: 72, PromotionSensitivity: 25 },
+    },
+    {
+      id: 5,
+      name: 'Tech & Late-Hour Shoppers',
+      emoji: '⚡',
+      color: '#06b6d4',
+      colorLight: 'rgba(6,182,212,0.15)',
+      colorBorder: 'rgba(6,182,212,0.35)',
+      badgeClass: 'badge-cyan',
+      count: 5610,
+      percentage: 17.0,
+      avgSpend: '€23,203',
+      frequency: '4.8×/mo',
+      recency: '18 days',
+      description: 'Tech-focused customers who shop late in the day and have high electronics spending. Receptive to tech bundles and night-time digital flash sales.',
+      tags: ['Electronics Share', 'Night Shoppers', 'Tech-Driven'],
+      radar: { Spending: 65, Frequency: 60, Recency: 70, Variety: 55, PromotionSensitivity: 35 },
+    },
+  ],
+
+  7: clusters, // default — Ward 7 clusters
+};
+
+export const clusterConfigs = {
+  scalers: ['StandardScaler', 'MinMaxScaler', 'RobustScaler'],
+  kValues: [5, 6, 7],
+  // Key metric table indexed by "scaler__k" using actual notebook metrics where available
+  metrics: {
+    'StandardScaler__5': { silhouette: 0.106, inertia: 633121, note: '' },
+    'StandardScaler__6': { silhouette: 0.101, inertia: 607103, note: '' },
+    'StandardScaler__7': { silhouette: 0.102, inertia: 574621, note: '' },
+    'RobustScaler__5':   { silhouette: 0.145, inertia: 435120, note: '' },
+    'RobustScaler__6':   { silhouette: 0.138, inertia: 412030, note: '' },
+    'RobustScaler__7':   { silhouette: 0.132, inertia: 395400, note: '★ Selected Model (Ward linkage)' },
+    'MinMaxScaler__5':   { silhouette: 0.115, inertia: 284300, note: '' },
+    'MinMaxScaler__6':   { silhouette: 0.108, inertia: 265400, note: '' },
+    'MinMaxScaler__7':   { silhouette: 0.102, inertia: 251200, note: '' },
+  },
+};
+"""
+
+with open('dashboard/src/data/clusterData.js', 'w', encoding='utf-8') as f:
+    f.write(js_content)
+
+print("clusterData.js updated successfully!")

@@ -341,7 +341,7 @@ export default function Promotions({ onVoucherChange }) {
             <div style="font-size: 0.82rem; line-height: 1.45; color: #333;">
               <div class="bold" style="color: #000;">INFO SEGMENTAÇÃO:</div>
               <div>• Afinidade de Compra: ${(rec.propensity * 100).toFixed(0)}%</div>
-              <div>• Algoritmo: ${rec.algorithm || 'K-Means (K=6)'}</div>
+              <div>• Algoritmo: ${rec.algorithm || 'Hierarchical (Ward, K=7)'}</div>
             </div>
             
             <div class="dashed"></div>
@@ -431,7 +431,7 @@ export default function Promotions({ onVoucherChange }) {
             description="Lift > 1 means the items are bought together more often than by chance. Rules with lift > 2.5 are strong candidates for bundle promotions."
             data={liftTraces}
             layout={{
-              xaxis:      { title: { text: 'Lift', font: { color: '#64748b' } }, range: [0, 3.8] },
+              xaxis:      { title: { text: 'Lift', font: { color: '#64748b' } }, range: [0, 10.0] },
               showlegend: true,
               bargap:     0.3,
               margin:     { l: 180, r: 60, t: 20, b: 40 },
@@ -447,7 +447,7 @@ export default function Promotions({ onVoucherChange }) {
                 🔍 Promotion Simulator <span className="badge badge-teal" style={{ fontSize: '0.7rem' }}>Interactive</span>
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                Escreva qualquer ID numérico (0 a 32938) ou ID de teste para calcular dinamicamente o segmento do cliente e sugestões de cross-selling através do modelo K-Means.
+                Escreva qualquer ID numérico (0 a 32938) ou ID de teste para calcular dinamicamente o segmento do cliente e sugestões de cross-selling através do modelo de Agrupamento Hierárquico (ligação de Ward).
               </p>
             </div>
 
@@ -711,7 +711,7 @@ export default function Promotions({ onVoucherChange }) {
                   {/* Segmentation Details */}
                   <div style={{ fontSize: '0.72rem', display: 'flex', flexDirection: 'column', gap: '2px', color: '#333' }}>
                     <div>• Afinidade de Compra: <strong>{(recommendation.propensity * 100).toFixed(0)}%</strong></div>
-                    <div>• Algoritmo: <strong>{recommendation.algorithm || 'K-Means (K=6) + Apriori'}</strong></div>
+                    <div>• Algoritmo: <strong>{recommendation.algorithm || 'Hierarchical (Ward, K=7) + Apriori'}</strong></div>
                   </div>
 
                   <div className="receipt-divider" />

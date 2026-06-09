@@ -88,7 +88,7 @@ export default function CartNavigation({ onNavigate, activeSection, onOpenWheel,
         {/* Logo */}
         <div className="nav-logo">
           <div className="nav-logo-hexagon" aria-hidden="true" />
-          <span>SegmentIQ</span>
+          <span>ClusterNova</span>
         </div>
 
         {/* Active section indicator */}
@@ -197,7 +197,7 @@ export default function CartNavigation({ onNavigate, activeSection, onOpenWheel,
         {/* Footer */}
         <div className="nav-drawer-footer">
           <span>⬡</span>
-          <span>SegmentIQ · Customer Analytics</span>
+          <span>ClusterNova · Customer Analytics</span>
         </div>
       </nav>
     </>

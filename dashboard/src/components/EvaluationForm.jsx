@@ -14,7 +14,7 @@ export default function EvaluationForm() {
     }
     // Save to localStorage
     const feedback = { rating, comment, date: new Date().toISOString() }
-    localStorage.setItem('segmentiq_app_evaluation', JSON.stringify(feedback))
+    localStorage.setItem('clusternova_app_evaluation', JSON.stringify(feedback))
     setSubmitted(true)
   }
 
@@ -34,7 +34,7 @@ export default function EvaluationForm() {
               <div style={{ marginBottom: '1.5rem' }}>
                 <span className="badge badge-purple" style={{ marginBottom: '0.5rem', background: 'rgba(124,58,237,0.18)', color: 'var(--purple-light)', padding: '0.2rem 0.65rem', borderRadius: '999px', fontSize: '0.72rem', fontWeight: 700, border: '1px solid rgba(124,58,237,0.4)' }}>⭐ Avaliação</span>
                 <h2 style={{ fontSize: '1.75rem', fontFamily: 'var(--font-display)', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                  O que achou do SegmentIQ?
+                  O que achou do ClusterNova?
                 </h2>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                   A sua opinião é muito importante para nós! Por favor, classifique o nosso trabalho prático de Machine Learning II.

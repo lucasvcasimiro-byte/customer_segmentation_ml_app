@@ -38,41 +38,15 @@ export default function App() {
   const [showSupport,   setShowSupport]   = useState(false)
   const [showAbout,     setShowAbout]     = useState(false)
 
-  // ── Smooth scroll to a section ──────────────────────────────────
-  const scrollToSection = useCallback((id) => {
-    const el = document.getElementById(id)
-    if (el) {
-      // Offset for the fixed nav bar (~68px)
-      const y = el.getBoundingClientRect().top + window.scrollY - 68
-      window.scrollTo({ top: y, behavior: 'smooth' })
-    }
-  }, [])
-
-  // ── Track active section with IntersectionObserver ───────────────
-  useEffect(() => {
-    const observers = []
-
-    SECTION_IDS.forEach(id => {
-      const el = document.getElementById(id)
-      if (!el) return
-
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id)
-        },
-        { threshold: 0.25, rootMargin: '-68px 0px 0px 0px' }
-      )
-      observer.observe(el)
-      observers.push(observer)
-    })
-
-    return () => observers.forEach(o => o.disconnect())
+  const handleSectionChange = useCallback((id) => {
+    setActiveSection(id)
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
   return (
     <div id="app">
       <CartNavigation
-        onNavigate={scrollToSection}
+        onNavigate={handleSectionChange}
         activeSection={activeSection}
         onOpenWheel={() => setShowWheel(true)}
         onOpenSupport={() => setShowSupport(true)}
@@ -80,12 +54,12 @@ export default function App() {
       />
 
       <main style={{ paddingTop: '68px' }}>
-        <Overview />
-        <Clustering />
-        <Visualizations />
-        <Promotions onVoucherChange={setActiveVoucher} />
-        <Store activeVoucher={activeVoucher} />
-        <Future />
+        {activeSection === 'overview' && <Overview />}
+        {activeSection === 'clustering' && <Clustering />}
+        {activeSection === 'visualizations' && <Visualizations />}
+        {activeSection === 'promotions' && <Promotions onVoucherChange={setActiveVoucher} />}
+        {activeSection === 'store' && <Store activeVoucher={activeVoucher} />}
+        {activeSection === 'future' && <Future />}
         <EvaluationForm />
       </main>
 
@@ -100,12 +74,12 @@ export default function App() {
       }}>
         <div style={{ marginBottom: '0.5rem' }}>
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--text-secondary)' }}>
-            ⬡ SegmentIQ
+            ⬡ ClusterNova
           </span>
         </div>
         <p>Customer Segmentation Dashboard · Machine Learning 2 · NOVA IMS</p>
         <p style={{ marginTop: '0.25rem' }}>
-          Built with React + Vite · Plotly.js · Placeholder data — replace with real notebook exports
+          Built with React + Vite · Plotly.js · Real notebook exports from ClusterNova
         </p>
       </footer>
 

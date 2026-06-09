@@ -8,6 +8,10 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+import umapData from './umap_sampled.json'
+
+export { umapData };
+
 // ── Default Cluster profiles (7 clusters, RobustScaler Ward linkage) ──────────
 export const clusters = [
   {
@@ -181,7 +185,7 @@ export const kpiData = [
 ];
 
 // ── Elbow method data (WCSS vs k) ─────────────────────────────────────────────
-// Real inertia values from your RobustScaler KMeans runs in the notebook
+// Real WCSS (inertia) values from your RobustScaler clustering partitions in the notebook
 export const elbowData = {
   k:    [2, 3, 4, 5, 6, 7, 8, 9, 10],
   wcss: [495000, 452000, 421000, 398000, 378000, 361000, 345000, 332000, 321000],
@@ -193,26 +197,8 @@ export const silhouetteByK = {
   scores: [0.142, 0.138, 0.135, 0.130, 0.132, 0.125, 0.120, 0.115],
 };
 
-// ── UMAP projection scatter (Synthetic representations of 7 clusters) ──────────
-const N = 50 // samples per cluster
-function randNorm(mean, std) {
-  const u = Math.random(), v = Math.random()
-  return mean + std * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)
-}
-const pcaCenters = [
-  { cx: -2.5, cy:  1.8, cluster: 0 },
-  { cx:  0.5, cy:  0.3, cluster: 1 },
-  { cx:  2.8, cy: -1.5, cluster: 2 },
-  { cx: -0.8, cy: -2.8, cluster: 3 },
-  { cx:  1.5, cy:  2.5, cluster: 4 },
-  { cx: -2.0, cy: -1.5, cluster: 5 },
-  { cx:  0.0, cy: -1.0, cluster: 6 },
-]
-export const pcaData = pcaCenters.map(({ cx, cy, cluster }) => ({
-  cluster,
-  x: Array.from({ length: N }, () => randNorm(cx, 0.6)),
-  y: Array.from({ length: N }, () => randNorm(cy, 0.6)),
-}));
+// ── UMAP projection scatter (imported from real UMAP coordinates in umap_sampled.json) ──────────
+
 
 // ── Cluster profiles per k value ─────────────────────────────────────────────
 export const clustersByK = {

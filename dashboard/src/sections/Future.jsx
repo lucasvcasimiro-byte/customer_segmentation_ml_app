@@ -130,7 +130,7 @@ export default function Future() {
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {[
-              { phase: 'Phase 1 — Complete', desc: 'EDA, K-Means clustering, silhouette analysis, PCA, basket analysis',      done: true  },
+              { phase: 'Phase 1 — Complete', desc: 'EDA, Hierarchical clustering (Ward linkage), silhouette analysis, UMAP projection, basket analysis',      done: true  },
               { phase: 'Phase 2 — Complete', desc: 'Interactive dashboard template with all charts and placeholder data',      done: true  },
               { phase: 'Phase 3 — Next',     desc: 'Connect real notebook exports: replace clusterData.js and basketData.js', done: false },
               { phase: 'Phase 4 — Future',   desc: 'Churn model, live CSV ingestion, A/B testing framework',                  done: false },

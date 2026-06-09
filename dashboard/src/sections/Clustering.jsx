@@ -99,7 +99,7 @@ export default function Clustering() {
           badgeClass="badge-teal"
           title="Customer "
           highlight="Segments"
-          subtitle="K-Means clustering applied to RFM + demographic features. Change the scaler or k below — the charts and cards update immediately."
+          subtitle="Hierarchical clustering (Ward linkage) applied to RFM + demographic features. Change the scaler or k below — the charts and cards update immediately."
         />
 
         {/* ── Interactive Controls ──────────────────────────────── */}

@@ -1,0 +1,15 @@
+import pandas as pd
+df = pd.read_csv('data/ci_clustered.csv')
+for name, group in df.groupby('final_cluster_label'):
+    print(f"=== Cluster: {name} ===")
+    print(f"Count: {len(group)}")
+    print(f"Avg Spend: {group['total_spend'].mean():.2f}")
+    print(f"Avg Age: {group['age'].mean():.2f}")
+    print(f"Avg Dependants: {group['dependants'].mean():.2f}")
+    print(f"Avg Complaints: {group['number_complaints'].mean():.2f}")
+    print(f"Avg Promo Pct: {group['percentage_of_products_bought_promotion'].mean():.2f}")
+    print(f"Avg share meat: {group['share_meat'].mean():.2f}")
+    print(f"Avg share vegetables: {group['share_vegetables'].mean():.2f}")
+    print(f"Avg share electronics: {group['share_electronics'].mean():.2f}")
+    print(f"Avg share videogames: {group['share_videogames'].mean():.2f}")
+    print("-" * 40)

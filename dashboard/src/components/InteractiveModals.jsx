@@ -289,7 +289,7 @@ export function SupportModal({ onClose }) {
     {
       id: 1,
       sender: 'agent',
-      text: 'Olá! Sou o assistente virtual do SegmentIQ. Como posso ajudar hoje? 😊',
+      text: 'Olá! Sou o assistente virtual do ClusterNova. Como posso ajudar hoje? 😊',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ])
@@ -298,8 +298,8 @@ export function SupportModal({ onClose }) {
 
   const faqs = [
     {
-      q: 'Como funciona o clustering no SegmentIQ?',
-      a: 'O SegmentIQ utiliza o algoritmo K-Means para agrupar clientes com base em métricas como Frequência e Valor de compras. Isso ajuda a segmentar os clientes em grupos como "Premium Loyalists" ou "At-Risk", permitindo campanhas de marketing direcionadas!'
+      q: 'Como funciona o clustering no ClusterNova?',
+      a: 'O ClusterNova utiliza o algoritmo de Agrupamento Hierárquico (com ligação de Ward) para agrupar clientes com base em métricas como Frequência e Valor de compras. Isso ajuda a segmentar os clientes em grupos como "Premium Loyalists" ou "At-Risk", permitindo campanhas de marketing direcionadas!'
     },
     {
       q: 'Qual o número ideal de clusters (k)?',
@@ -314,8 +314,8 @@ export function SupportModal({ onClose }) {
       a: 'Como o histórico de compras e valor gasto têm distribuições muito enviesadas e com caudas longas (outliers), o StandardScaler seria distorcido pelas observações extremas. O RobustScaler utiliza a mediana e o intervalo interquartílico (IQR), mitigando a influência de grandes outliers.'
     },
     {
-      q: 'Como funciona a Principal Component Analysis (PCA) neste projeto?',
-      a: 'Usámos o PCA para reduzir as 10+ variáveis de comportamento e perfil de compra a apenas 3 componentes principais. Isto permitiu explicar a maior parte da variabilidade dos dados e projetar o gráfico de dispersão 3D, onde a separação em 7 clusters é perfeitamente visível.'
+      q: 'Como funciona o UMAP (Uniform Manifold Approximation and Projection) neste projeto?',
+      a: 'Utilizámos o UMAP para reduzir as 10+ variáveis de comportamento e perfil de compra a apenas 2 coordenadas bidimensionais. Isso permitiu projetar o gráfico de dispersão 2D na galeria, exibindo a topologia real dos dados e a excelente separação dos 7 clusters.'
     },
     {
       q: 'Como funciona a recomendação por Regras de Associação (Apriori)?',
@@ -434,7 +434,7 @@ export function AboutUsModal({ onClose }) {
     {
       name: 'Lourenço Lima',
       role: 'Data & Analytics Guru',
-      desc: 'O mestre dos gráficos interativos. Transformou coordenadas do PCA em arte visual tridimensional para que qualquer pessoa consiga ver a alma de um Premium Loyalist.',
+      desc: 'O mestre dos gráficos interativos. Projetou as coordenadas do UMAP em gráficos interativos bidimensionais para que qualquer pessoa consiga ver a alma de um Premium Loyalist.',
       color: 'var(--teal)'
     },
     {
@@ -452,7 +452,7 @@ export function AboutUsModal({ onClose }) {
 
         <div className="about-header">
           <h2>👥 Sobre Nós</h2>
-          <p>A equipa por trás do SegmentIQ — Licenciatura em Ciência de Dados na NOVA IMS.</p>
+          <p>A equipa por trás do ClusterNova — Licenciatura em Ciência de Dados na NOVA IMS.</p>
         </div>
 
         <div className="about-grid">

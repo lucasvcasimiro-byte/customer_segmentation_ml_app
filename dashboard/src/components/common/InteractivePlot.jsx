@@ -79,6 +79,7 @@ export default function InteractivePlot({
   layout      = {},
   csvData     = null,
   height      = 400,
+  children,
 }) {
   const containerRef = useRef(null)
   const [isLoading, setIsLoading]   = useState(true)
@@ -191,6 +192,19 @@ export default function InteractivePlot({
         {/* Plotly mount point */}
         <div ref={containerRef} style={{ width: '100%' }} />
       </div>
+
+      {children && (
+        <div className="plot-card-academic-summary" style={{
+          padding: '1.25rem 1.5rem',
+          borderTop: '1px solid var(--border-subtle)',
+          background: 'rgba(7, 9, 26, 0.35)',
+          fontSize: '0.8rem',
+          lineHeight: '1.65',
+          color: 'var(--text-secondary)',
+        }}>
+          {children}
+        </div>
+      )}
     </div>
   )
 }
