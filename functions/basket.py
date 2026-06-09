@@ -57,8 +57,14 @@ def generate_association_rules(
         min_threshold=min_threshold
     )
 
+    if rules.empty:
+        return pd.DataFrame()
+
     rules = rules[rules["confidence"] >= min_confidence]
     
+    if rules.empty:
+        return pd.DataFrame()
+        
     rules = rules[rules['antecedents'].apply(lambda x: len(x) == 1)]
     rules = rules[rules['consequents'].apply(lambda x: len(x) == 1)]
 
